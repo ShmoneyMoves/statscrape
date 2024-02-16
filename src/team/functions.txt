@@ -1,0 +1,4 @@
+get_team_schedule(team, year)
+
+get_team_schedule_boxscore(team, year)
+
