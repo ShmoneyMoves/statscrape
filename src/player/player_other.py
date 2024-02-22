@@ -15,7 +15,7 @@ def get_first_season(player):
     if validation[0]:
 
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01.html"
-        response = requests.get(url, get_proxy())
+        response = requests.get(url, proxies=get_proxy())
     
         soup = BeautifulSoup(response.text, 'html.parser')
         stats_table = soup.find('table', {'id': 'per_game'})
@@ -32,7 +32,7 @@ def get_last_season(player):
     validation = validate_name(player)
     if validation[0]:
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01.html"
-        response = requests.get(url, get_proxy())
+        response = requests.get(url, proxies=get_proxy())
     
         soup = BeautifulSoup(response.text, 'html.parser')
         

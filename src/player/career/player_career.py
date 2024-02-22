@@ -4,7 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import time
 
 import requests
 import os, sys
@@ -77,26 +76,3 @@ def get_career_playoff_stats(player):
             
     else:
         return ["ERROR:", validation[1]]
-    
-# Returns given player's career stats against given team. Since basketball-reference.com
-# blocks IPs for an hour if more than 20 requests are sent per minute, this will wait 5 
-# seconds between each request. This will mean that at most 14 requests will be made per
-# minute and your IP address will not be blocked.
-def get_career_stats_against_team(player, team):
-    validation = validate_name(player)
-    if(validation[0]):
-        first_season = get_first_season(player)
-        last_season = get_last_season(player)
-        stats = []
-        for i in range(int(first_season), int(last_season) + 1):
-            stats.append(get_season_stats_against_team(player, str(i), team))
-        cleaned_stats = []
-        cleaned_stats.append(stats[0][0])
-        for season in stats:
-            for game in season:
-                if game[0] != 'Rk':
-                    cleaned_stats.append(game)
-        return cleaned_stats
-    
-    else:
-        return "ERROR: Validation error"
