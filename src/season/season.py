@@ -37,11 +37,3 @@ def load_season_stats(year, table):
                 if csv_entry != "":
                     file.write(csv_entry + "\n")
 
-
-for i in range(2000, 2025):
-    load_season_stats(str(i), "per_game-team")
-    print(f"Season {get_directory(i)} per_game-team: SUCCESS")
-    load_season_stats(str(i), "advanced-team")
-    print(f"Season {get_directory(i)} advanced-team: SUCCESS")
-    time.sleep(8)
-

@@ -77,7 +77,3 @@ def update_proxies():
                 file.write("{ 'https': '" + proxy + "' }\n")
 
 
-# Run the update_proxies function
-update_proxies()
-
-
