@@ -1,1 +1,0 @@
-get_game_boxscore(team_one, team_two, data)
