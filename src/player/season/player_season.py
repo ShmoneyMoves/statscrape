@@ -9,14 +9,13 @@ import requests
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from validate_name import validate_name
-from proxy import get_proxy
 
 # Retrieves a player's statistics for every game of the given season.
 def get_season_stats(player, season):
     validation = validate_name(player)
     if validation[0]:
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01/gamelog/" + season
-        response = requests.get(url, proxies=get_proxy())
+        response = requests.get(url)
     
         soup = BeautifulSoup(response.text, 'html.parser')
         

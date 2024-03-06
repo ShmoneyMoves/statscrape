@@ -53,6 +53,148 @@ def get_league_offensive_defenseive_pace():
             return result
     return result
 
+def get_team_rating_on_day(season, team, date):
+    with open(f"season/csv/{season}/teams/{team}.txt", "r") as file:
+        for line in file:
+            data = line.split(',')
+            game_date = data[0]
+            if date == game_date:
+                return [data[1], data[2], data[3]]
+
+def get_league_average_on_day(season, date):
+    with open(f"season/csv/{season}/league_average.txt", "r") as file:
+        for line in file:
+            data = line.split(',')
+            game_date = data[0]
+            if date == game_date:
+                return [data[1], data[2], data[3]]
+
+def predict_season(season):
+    #       corrent, incorrect
+    moneyline_talley = [0, 0]
+    #                                   1  2  3  4  5  6  7  8  9  10 
+    outright_by_differential_correct = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    outright_by_differential_incorrect = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    spread_talley = [0, 0]
+    with open(f"season/csv/{season}/box_score.txt") as file:
+        for i, game in enumerate(file):
+            if i == 0:
+                continue
+            data = game.split(',')
+            date = data[0]
+            home_team = data[1]
+            away_team = data[23]
+
+            home_score = float(data[4])
+            away_score = float(data[26])
+            winner = "tie"
+            spread = home_score - away_score
+            if data[2] == "W":
+                winner = home_team
+            else:
+                winner = away_team
+            home_ratings = get_team_rating_on_day(season, home_team, date)
+            away_ratings = get_team_rating_on_day(season, away_team, date)
+            average_ratings = get_league_average_on_day(season, date)
+
+            prediction = predict_manually(home_team, float(home_ratings[0]), float(home_ratings[1]), float(home_ratings[2]), away_team, float(away_ratings[0]), float(away_ratings[1]), float(away_ratings[2]), float(average_ratings[2]), float(average_ratings[0]))
+
+            predicted_spread = abs(prediction[0] - prediction[1])
+
+            predicted_winner = "tie"
+            if prediction[0] > prediction[1]:
+                predicted_winner = home_team
+            else:
+                predicted_winner = away_team
+
+            if round(predicted_spread) == 1 or round(predicted_spread) == 0:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[0] = outright_by_differential_correct[0] + 1
+                else:
+                    outright_by_differential_incorrect[0] = outright_by_differential_incorrect[0] + 1
+            elif round(predicted_spread) == 2:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[1] = outright_by_differential_correct[1] + 1
+                else:
+                    outright_by_differential_incorrect[1] = outright_by_differential_incorrect[1] + 1
+            elif round(predicted_spread) == 3:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[2] = outright_by_differential_correct[2] + 1
+                else:
+                    outright_by_differential_incorrect[2] = outright_by_differential_incorrect[2] + 1
+            elif round(predicted_spread) == 4:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[3] = outright_by_differential_correct[3] + 1
+                else:
+                    outright_by_differential_incorrect[3] = outright_by_differential_incorrect[3] + 1
+            elif round(predicted_spread) == 5:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[4] = outright_by_differential_correct[4] + 1
+                else:
+                    outright_by_differential_incorrect[4] = outright_by_differential_incorrect[4] + 1
+            elif round(predicted_spread) == 6:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[5] = outright_by_differential_correct[5] + 1
+                else:
+                    outright_by_differential_incorrect[5] = outright_by_differential_incorrect[5] + 1
+            elif round(predicted_spread) == 7:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[6] = outright_by_differential_correct[6] + 1
+                else:
+                    outright_by_differential_incorrect[6] = outright_by_differential_incorrect[6] + 1
+            elif round(predicted_spread) == 8:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[7] = outright_by_differential_correct[7] + 1
+                else:
+                    outright_by_differential_incorrect[7] = outright_by_differential_incorrect[7] + 1
+            elif round(predicted_spread) == 9:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[8] = outright_by_differential_correct[8] + 1
+                else:
+                    outright_by_differential_incorrect[8] = outright_by_differential_incorrect[8] + 1
+            elif round(predicted_spread) >= 10:
+                if predicted_winner == winner:
+                    outright_by_differential_correct[9] = outright_by_differential_correct[9] + 1
+                else:
+                    outright_by_differential_incorrect[9] = outright_by_differential_incorrect[9] + 1
+            else:
+                print(f"SPREAD={predicted_spread}")
+                
+            if predicted_spread <= spread:
+                spread_talley[0] = spread_talley[0] + 1
+            else:
+                spread_talley[1] = spread_talley[1] + 1
+
+            if predicted_winner == winner:
+                moneyline_talley[0] = moneyline_talley[0] + 1
+            else:
+                moneyline_talley[1] = moneyline_talley[1] + 1
+
+        differential_total = []
+        for i in range(0, 10):
+            differential_total.append(outright_by_differential_correct[i] + outright_by_differential_incorrect[i])
+
+        outright_correct_as_percentage = [0] * 10
+        outright_incorrect_as_percentage = [0] * 10
+        for i in range(0, 10):
+            outright_correct_as_percentage[i] = str(round((outright_by_differential_correct[i] / differential_total[i])*100, 1)) + "%"
+            outright_incorrect_as_percentage[i] = str(round((outright_by_differential_incorrect[i] / differential_total[i])*100, 1)) + "%"
+            
+    response = [
+        f"Correct Moneyline: {moneyline_talley[0]}", 
+        f"Correct Moneyline Percentage: {round((moneyline_talley[0]/(moneyline_talley[0] + moneyline_talley[1]))*100, 1)}%", 
+        f"Incorrect Moneyline: {moneyline_talley[1]}", 
+        f"Incorrect Percentage Moneyline: {round((moneyline_talley[1]/(moneyline_talley[0] + moneyline_talley[1]))*100, 1)}%",
+        f"Correct Spread: {spread_talley[0]}", 
+        f"Correct Spread Percentage: {round((spread_talley[0]/(spread_talley[0] + spread_talley[1]))*100, 1)}%", 
+        f"Incorrect Spread: {spread_talley[1]}", 
+        f"Incorrect Percentage Spread: {round((spread_talley[1]/(spread_talley[0] + spread_talley[1]))*100, 1)}%\n",
+        f"Correct by Differential: {outright_by_differential_correct}",
+        f"Correct by Differential Percentage: {outright_correct_as_percentage}\n",
+        f"Incorrect by Differential: {outright_by_differential_incorrect}",
+        f"Incorrect by Differential Percentage: {outright_incorrect_as_percentage}"
+    ]
+    return response
 
 def predict_final_score(team_aoppp, predicted_pace):
     # 1. Return (team_aopp * predicted_pace) / 100
@@ -61,10 +203,10 @@ def predict_final_score(team_aoppp, predicted_pace):
 # Home team is team one
 # Away team is team two
 def predict_manually(team_one, team_one_ortg, team_one_drtg, team_one_pace, team_two, team_two_ortg, team_two_drtg, team_two_pace, league_pace, league_ortg):
-    team_one_adrtg = 1.014 * team_one_drtg
-    team_one_aortg = 0.986 * team_one_ortg
-    team_two_adrtg = 0.986 * team_two_drtg
-    team_two_aortg = 1.014 * team_two_ortg
+    team_one_adrtg = 0.986 * team_one_drtg
+    team_one_aortg = 1.014 * team_one_ortg
+    team_two_adrtg = 1.014 * team_two_drtg
+    team_two_aortg = 0.986 * team_two_ortg
 
     game_pace = (team_one_pace * team_two_pace) / league_pace
 
@@ -73,6 +215,8 @@ def predict_manually(team_one, team_one_ortg, team_one_drtg, team_one_pace, team
 
     team_one_final_score = (team_one_ppp * game_pace) / 100
     team_two_final_score = (team_two_ppp * game_pace) / 100
+
+    return [team_one_final_score, team_two_final_score]
 
     print("+---------- Final Score Prediction ----------+")
     print(team_one + ": " + str(round(team_one_final_score, 1)))

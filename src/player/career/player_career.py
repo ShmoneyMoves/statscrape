@@ -12,14 +12,13 @@ from validate_name import validate_name
 
 from player.player_other import get_first_season, get_last_season
 from player.season.player_season import get_season_stats_against_team
-from proxy import get_proxy
 
 # Retrieves a player's per game statistics for every season of their career.
 def get_career_stats(player):
     validation = validate_name(player)
     if validation[0]:
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01.html"
-        response = requests.get(url, proxies=get_proxy())
+        response = requests.get(url)
     
         soup = BeautifulSoup(response.text, 'html.parser')
         

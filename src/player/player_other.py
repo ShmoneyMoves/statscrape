@@ -8,14 +8,13 @@ from selenium.webdriver.chrome.options import Options
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from validate_name import validate_name
-from proxy import get_proxy
 
 def get_first_season(player):
     validation = validate_name(player)
     if validation[0]:
 
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01.html"
-        response = requests.get(url, proxies=get_proxy())
+        response = requests.get(url)
     
         soup = BeautifulSoup(response.text, 'html.parser')
         stats_table = soup.find('table', {'id': 'per_game'})
@@ -32,7 +31,7 @@ def get_last_season(player):
     validation = validate_name(player)
     if validation[0]:
         url = "https://www.basketball-reference.com/players/" + validation[1][:1].lower() + "/" + validation[1].lower() + "01.html"
-        response = requests.get(url, proxies=get_proxy())
+        response = requests.get(url)
     
         soup = BeautifulSoup(response.text, 'html.parser')
         
