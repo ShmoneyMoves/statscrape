@@ -384,3 +384,29 @@ def relative_prediction():
         print(total_pace/game_count)
         print(f"ORtg: {round((total_ortg/game_count)*((total_pace/game_count)/100), 1)}")
         print(f"DRtg: {round((total_drtg/game_count)*((total_pace/game_count)/100), 1)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # 110 = A*injuries() + B*travel() + C*previous_performances() + D*home_court() + E*fatigue() + F*refs() + G*time_of_day() + predict_score()
+        # 115
+
+
+        # 5  10 -5
+        # 5  9  -4
