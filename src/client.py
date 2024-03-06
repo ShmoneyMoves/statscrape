@@ -1,9 +1,10 @@
+import csv
 from player.career.player_career import get_career_stats, get_career_playoff_stats
 from player.season.player_season import get_season_stats, get_season_stats_against_team, get_season_stat_average, get_season_stat_total
 from player.player_other import get_first_season, get_last_season, calculate_ortg, scrape_ortg
 from team.team import get_team_schedule, get_boxscore_links, get_injury_report, get_stat_totals, get_rtg_by_lineup, get_starting_lineup, get_four_factors_by_game, get_all_games_four_factors, get_games_on_date
-from season.season import load_season_stats
-from game_predictor import predict_manually, predict_game_v1, predict_game_v2, relative_prediction
+from season.season import load_season_stats, fetch_season_boxscores, calculate_league_average, calculate_team_ratings_progressively, calculate_daily_team_ratings
+from game_predictor import predict_manually, predict_game_v1, predict_game_v2, relative_prediction, predict_season
 
 def get_team_stat_totals(team, year):
     return get_stat_totals(team, year)
@@ -67,6 +68,18 @@ def get_games_by_date(date):
 def create_season_stats_table(year, table):
     return load_season_stats(year, table)
 
+def get_season_boxscores(year):
+    return fetch_season_boxscores(year)
+
+def get_season_league_averages(season):
+    return calculate_league_average(season)
+
+def get_season_team_ratings_progressively(box_score_file, team_abbreivation):
+    return calculate_team_ratings_progressively(box_score_file, team_abbreivation)
+
+def get_daily_team_ratings(box_score_file, team_abbreviation):
+    return calculate_daily_team_ratings(box_score_file, team_abbreviation)
+
 def predict_manual(team_one, team_one_ortg, team_one_drtg, team_one_pace, team_two, team_two_ortg, team_two_drtg, team_two_pace, league_pace, league_ortg):
     return predict_manually(team_one, team_one_ortg, team_one_drtg, team_one_pace, team_two, team_two_ortg, team_two_drtg, team_two_pace, league_pace, league_ortg)
 
@@ -96,59 +109,94 @@ def predict_games_on(date):
         response = predict_v1(game[0], game[1])
         print(response)
 
+def predict_year(season):
+    return predict_season(season)
+
 def get_relative_prediction():
     return relative_prediction()
 
 def main():
-    # response = predict_game_v1("Dallas Mavericks", "Toronto Raptors")
-    # print(response)
-    # with open("2024_Celtics_FourFactors.txt", "r") as file:
-    #     ortg = 0
-    #     drtg = 0
-    #     pace_total = 0
-    #     count = 0
-    #     for line_number, line  in enumerate(file):
-    #         if line_number < 2:
+    #####################################################
+    #   1. Calculate league average on every date
+    #   2. Calculate each team's ORtg, DRtg, Pace on every date
+    #   3. Run score prediction
+    #####################################################
+    # teams = [
+    #     "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW", 
+    #     "HOU", "IND", "LAC", "LAL", "MEM", "MIA", "MIL", "MIN", "NOP", "NYK", 
+    #     "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
+    # ]
+    # for team in teams:
+    #     file = f"season/csv/2022-23/teams/{team}.txt"
+    #     response = get_daily_team_ratings("season/csv/2022-23/box_score.txt", team)
+    #     with open(file, "w") as file:
+    #         for entry in response:
+    #             entry = [str(i) for i in entry]
+    #             csv_row = ','.join(entry)
+    #             file.write(csv_row + "\n")
+    #     print(len(response))
+
+    response = predict_year("2022-23")
+    for point in response:
+        print(point)
+
+
+    #####################################################
+    #   LOAD ALL BOX SCORES FROM A GIVEN SEASON
+    #####################################################
+    # response = get_season_boxscores("2023")
+
+    # game_index = 0
+    # game_csv = ""
+    # for game in response:
+
+    #     if game_index == 0:
+    #         game_csv = game[2] + ","
+    #     for index, data_point in enumerate(game):
+
+    #         if index == 1 or index == 2:
     #             continue
-    #         else:
-    #             count = count + 1
-    #             pace_total = pace_total + (float(line.split(",")[1])/100)
-    #             adjusted_pace = 1
-    #             if line.split(',')[0] == "BOS":
-    #                 ortg = (ortg + (float(line.split(',')[6]))*adjusted_pace)
-    #                 drtg = (drtg + (float(line.split(',')[13]))*adjusted_pace)
-    #             else:
-    #                 ortg = ortg + (float(line.split(',')[13]))*adjusted_pace
-    #                 drtg = drtg + (float(line.split(',')[6]))*adjusted_pace
+    #         game_csv = game_csv + data_point + ","
 
-    #     print(count)
-    #     print(pace_total/count)
-    #     print(round((ortg/count), 1), round((drtg/count), 1))
-    # exit(0)
+    #     if game_index == 1:
+    #         game_index = 0
+    #         with open("season/csv/2022-23/box_score.txt", "a") as file:
+    #             file.write(game_csv + "\n")
+    #         # print(game_csv)
+    #         game_csv = ""
+    #     else:
+    #         game_index = 1
+        
 
-    teamfga = 5205
-    teamfg = 2521
-    teamfta = 1260
-    teamorb = 612
-    teamdrb = 2118
-    teamtov = 725
-    oppdrb = 1875
-    oppfga = 5359
-    oppfg = 2399
-    oppfta = 1089
-    opporb = 653
-    opptov = 683
+    
+    #print(response)
 
-    #           0.5 * ((Tm FGA + 0.4 * Tm FTA – 1.07 * (Tm ORB / (Tm ORB + Opp DRB)) * (Tm FGA – Tm FG) + Tm TOV) + (Opp FGA + 0.4 * Opp FTA – 1.07 * (Opp ORB / (Opp ORB + Tm DRB)) * (Opp FGA – Opp FG) + Opp TOV)
-    possesions = 0.5 *((teamfga + 0.4 * teamfta - 1.07 * (teamorb/(teamorb + oppdrb)) * (teamfga - teamfg) + teamtov) + (oppfga + 0.4 * oppfta - 1.07 * (opporb/(opporb + teamdrb)) * (oppfga - oppfg) + opptov))
-    print(possesions/58)
+    #####################################################
+    #   CALCULATE GAME PREDICTION
+    #####################################################
+    # teamfga = 84
+    # teamfg = 34
+    # teamfta = 14
+    # teamorb = 7
+    # teamdrb = 41
+    # teamtov = 12
+    # oppdrb = 38
+    # oppfga = 83
+    # oppfg = 36
+    # oppfta = 13
+    # opporb = 6
+    # opptov = 10
 
-    team_one_pts = 6999
-    team_two_pts = 6394
+    # #           0.5 * ((Tm FGA + 0.4 * Tm FTA – 1.07 * (Tm ORB / (Tm ORB + Opp DRB)) * (Tm FGA – Tm FG) + Tm TOV) + (Opp FGA + 0.4 * Opp FTA – 1.07 * (Opp ORB / (Opp ORB + Tm DRB)) * (Opp FGA – Opp FG) + Opp TOV)
+    # possesions = 0.5 *((teamfga + 0.4 * teamfta - 1.07 * (teamorb/(teamorb + oppdrb)) * (teamfga - teamfg) + teamtov) + (oppfga + 0.4 * oppfta - 1.07 * (opporb/(opporb + teamdrb)) * (oppfga - oppfg) + opptov))
+    # print(possesions)
 
-    print(f"Team 1 ORtg: {round((team_one_pts/possesions)*100, 1)}")
+    # team_one_pts = 90
+    # team_two_pts = 88
 
-    print(f"Team 1 ORtg: {round((team_two_pts/possesions)*100, 1)}")
+    # print(f"Team 1 ORtg: {round((team_one_pts/possesions)*100, 1)}")
+
+    # print(f"Team 1 ORtg: {round((team_two_pts/possesions)*100, 1)}")
 
     # 97.9 posessions     points scored
     # 48 minutes           100 possesions
