@@ -1,0 +1,13 @@
+['James Harden', 19.1, 17.2]
+['Kawhi Leonard', 23.9, 21.4]
+['Paul George', 21.8, 21.4]
+['Norman Powell', 12.7, 12.5]
+['Terance Mann', 8.5, 8.1]
+['Russell Westbrook', 12.5, 13.2]
+['Ivica Zubac', 9.9, 8.5]
+['Amir Coffey', 5.0, 4.6]
+['Daniel Theis', 4.7, 4.4]
+['Mason Plumlee', 0.0, 0.0]
+['Kobe Brown', 1.4, 1.6]
+Team ORtg: 119.6
+Team DRtg: 112.9

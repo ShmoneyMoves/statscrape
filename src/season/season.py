@@ -74,6 +74,7 @@ def fetch_season_boxscores(year):
         
         button.click()
         print(f"{i}th Button Clicked...")
+    driver.quit()
     return result
 
 
@@ -91,6 +92,8 @@ def fetch_season_boxscores(year):
     # opptov = 683
     # team_one_pts = 6999
     # team_two_pts = 6394
+
+#
 def get_ratings_from_stats(team_fga, team_fg, team_fta, team_orb, team_drb, team_tov, team_pts, opp_fga, opp_fg, opp_fta, opp_orb, opp_drb, opp_tov, opp_pts, num_games):
 
     # print("-------------------------------------")
@@ -120,78 +123,98 @@ def get_ratings_from_stats(team_fga, team_fg, team_fta, team_orb, team_drb, team
 def calculate_team_ratings_progressively(box_score_file, team_abbreviation):
     response = []
     with open(box_score_file, "r") as file:
+        game_count = 1
         for line in file:
             date_ratings = []
             data = line.split(',')
-            if team_abbreviation == data[1]:
-                ratings = get_ratings_from_stats(float(data[6]), float(data[5]), float(data[12]), float(data[14]), float(data[15]), float(data[20]), float(data[4]), float(data[28]), float(data[27]), float(data[34]), float(data[36]), float(data[37]), float(data[42]), float(data[26]))
-                date_ratings.append(data[0])
-                date_ratings.append(ratings[0])
-                date_ratings.append(ratings[1])
-                date_ratings.append(ratings[2])
-                response.append(date_ratings)
-            elif team_abbreviation == data[23]:
-                ratings = get_ratings_from_stats(float(data[28]), float(data[27]), float(data[34]), float(data[36]), float(data[37]), float(data[42]), float(data[26]), float(data[6]), float(data[5]), float(data[12]), float(data[14]), float(data[15]), float(data[20]), float(data[4]))
-                date_ratings.append(data[0])
+
+            if str(team_abbreviation + " ") in str(data[0].split(" ")[0] + " "):
+                team_one = data[0].split(" ")[0]
+                team_one_ratings = get_team_boxscore_on_date(box_score_file, team_one, data[1])
+                team_two = data[0].split(" ")[2]
+                team_two_ratings = get_team_boxscore_on_date(box_score_file, team_two, data[1])
+                ratings = get_ratings_from_stats(float(team_one_ratings[0]), float(team_one_ratings[1]), float(team_one_ratings[2]), float(team_one_ratings[3]), float(team_one_ratings[4]), float(team_one_ratings[5]), float(team_one_ratings[6]), float(team_two_ratings[0]), float(team_two_ratings[1]), float(team_two_ratings[2]), float(team_two_ratings[3]), float(team_two_ratings[4]), float(team_two_ratings[5]), float(team_two_ratings[6]), game_count)
+                date_ratings.append(data[1])
                 date_ratings.append(ratings[0])
                 date_ratings.append(ratings[1])
                 date_ratings.append(ratings[2])
                 response.append(date_ratings)
         return response
 
+def get_team_boxscore_on_date(box_score_file, team, date):
+    response = []
+    print(team, date)
+    with open(box_score_file, "r") as file:
+        for line in file:
+            data = line.split(',')
+            if team in data[0] and date == data[1]:
+                team_one = data[0].split(' ')[0]
+                if team == team_one:
+                    response = [data[6], data[5], data[12], data[14], data[15], data[20], data[4]]
+                    return response
+
 def calculate_daily_team_ratings(box_score_file, team_abbreviation):
     #    0          1       2         3         4           5       6         7       8       9        10       11        12        12
     # team_fga, team_fg, team_fta, team_orb, team_drb, team_tov, team_pts, opp_fga, opp_fg, opp_fta, opp_orb, opp_drb, opp_tov, opp_pts
     response = []
+    #                 home away home_count away_count
+    home_away_points = [0, 0, 0, 0]
     data_totals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     count = 1
     with open(box_score_file, "r") as file:
         for line in file:
             if team_abbreviation in line:
                 data = line.split(',')
-                if data[1] == team_abbreviation:
-                    data_totals[0] = data_totals[0] + float(data[6])
-                    data_totals[1] = data_totals[1] + float(data[5])
-                    data_totals[2] = data_totals[2] + float(data[12])
-                    data_totals[3] = data_totals[3] + float(data[14])
-                    data_totals[4] = data_totals[4] + float(data[15])
-                    data_totals[5] = data_totals[5] + float(data[20])
-                    data_totals[6] = data_totals[6] + float(data[4])
+                matchup = data[0].split(' ')
+                if str(matchup[0] + " ") == str(team_abbreviation + " "):
+                    flag = True
+                    # team box score
+                    team_one_ratings = get_team_boxscore_on_date(box_score_file, matchup[0], data[1])
+                    data_totals[0] = data_totals[0] + float(team_one_ratings[0])
+                    data_totals[1] = data_totals[1] + float(team_one_ratings[1])
+                    data_totals[2] = data_totals[2] + float(team_one_ratings[2])
+                    data_totals[3] = data_totals[3] + float(team_one_ratings[3])
+                    data_totals[4] = data_totals[4] + float(team_one_ratings[4])
+                    data_totals[5] = data_totals[5] + float(team_one_ratings[5])
+                    data_totals[6] = data_totals[6] + float(team_one_ratings[6])
 
-                    data_totals[7] = data_totals[7] + float(data[28])
-                    data_totals[8] = data_totals[8] + float(data[27])
-                    data_totals[9] = data_totals[9] + float(data[34])
-                    data_totals[10] = data_totals[10] + float(data[36])
-                    data_totals[11] = data_totals[11] + float(data[37])
-                    data_totals[12] = data_totals[12] + float(data[42])
-                    data_totals[13] = data_totals[13] + float(data[26])
-                elif data[23] == team_abbreviation:
-                    data_totals[0] = data_totals[0] + float(data[28])
-                    data_totals[1] = data_totals[1] + float(data[27])
-                    data_totals[2] = data_totals[2] + float(data[34])
-                    data_totals[3] = data_totals[3] + float(data[36])
-                    data_totals[4] = data_totals[4] + float(data[37])
-                    data_totals[5] = data_totals[5] + float(data[42])
-                    data_totals[6] = data_totals[6] + float(data[26])
-
-                    data_totals[7] = data_totals[7] + float(data[6])
-                    data_totals[8] = data_totals[8] + float(data[5])
-                    data_totals[9] = data_totals[9] + float(data[12])
-                    data_totals[10] = data_totals[10] + float(data[14])
-                    data_totals[11] = data_totals[11] + float(data[15])
-                    data_totals[12] = data_totals[12] + float(data[20])
-                    data_totals[13] = data_totals[13] + float(data[4])
+                    # opp box score
+                    team_two_ratings = get_team_boxscore_on_date(box_score_file, matchup[2], data[1])
+                    data_totals[7] = data_totals[7] + float(team_two_ratings[0])
+                    data_totals[8] = data_totals[8] + float(team_two_ratings[1])
+                    data_totals[9] = data_totals[9] + float(team_two_ratings[2])
+                    data_totals[10] = data_totals[10] + float(team_two_ratings[3])
+                    data_totals[11] = data_totals[11] + float(team_two_ratings[4])
+                    data_totals[12] = data_totals[12] + float(team_two_ratings[5])
+                    data_totals[13] = data_totals[13] + float(team_two_ratings[6])
+                    if matchup[1] == "@":
+                        home_away_points[1] = home_away_points[1] + float(team_one_ratings[6])
+                        home_away_points[3] = home_away_points[3] + 1
+                    elif matchup[1] == "vs.":
+                        home_away_points[0] = home_away_points[0] + float(team_one_ratings[6])
+                        home_away_points[2] = home_away_points[2] + 1
                 else:
                     if team_abbreviation == "MIN" and data[3] == team_abbreviation:
                         continue
                     else:
-                        print(f"ERROR: Game {count}")
-
-
-                ratings = get_ratings_from_stats(data_totals[0], data_totals[1], data_totals[2], data_totals[3], data_totals[4], data_totals[5], data_totals[6], data_totals[7], data_totals[8], data_totals[9], data_totals[10], data_totals[11], data_totals[12], data_totals[13], count)
-                daily_ratings = [data[0], ratings[0], ratings[1], ratings[2], f"Game {count}"]
-                response.append(daily_ratings)
-                count = count + 1
+                        flag = False
+                if flag:
+                    ratings = get_ratings_from_stats(data_totals[0], data_totals[1], data_totals[2], data_totals[3], data_totals[4], data_totals[5], data_totals[6], data_totals[7], data_totals[8], data_totals[9], data_totals[10], data_totals[11], data_totals[12], data_totals[13], count)
+                    if home_away_points[3] == 0:
+                        away_avg = 0
+                    else:
+                        away_avg = round((home_away_points[1]/home_away_points[3]), 1)
+                    if home_away_points[2] == 0:
+                        home_avg = 0
+                    else:
+                        home_avg = round((home_away_points[0]/home_away_points[2]), 1)
+                    ppg_avg = round(((home_away_points[0] + home_away_points[1]) / count), 1)
+                    home_diff_percentage = round((home_avg / ppg_avg), 3)
+                    away_diff_percentage = round((away_avg / ppg_avg), 3)
+                    #               date        matchup   ortg      drtg        pace            home_factor      ppg(home)      away_factor     ppg(away)   ppg(season)
+                    daily_ratings = [data[1], data[0], ratings[0], ratings[1], ratings[2], home_diff_percentage, home_avg, away_diff_percentage, away_avg, ppg_avg, f"Game {count}"]
+                    response.append(daily_ratings)
+                    count = count + 1
         return response
 
 def calculate_league_average(season):
@@ -199,7 +222,7 @@ def calculate_league_average(season):
     teams = [
         "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW", 
         "HOU", "IND", "LAC", "LAL", "MEM", "MIA", "MIL", "MIN", "NOP", "NYK", 
-        "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS", "TOR"
+        "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
     ]
     #              DATE, ORtg, DRtg, Pace
     average_list = []
@@ -209,9 +232,9 @@ def calculate_league_average(season):
             for line in file:
                 data = line.split(',')
                 date = data[0]
-                ortg = float(data[1])
-                drtg = float(data[2])
-                pace = float(data[3])
+                ortg = float(data[2])
+                drtg = float(data[3])
+                pace = float(data[4])
 
                 flag = False
                 for i, day in enumerate(average_list):

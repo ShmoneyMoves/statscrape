@@ -1,0 +1,14 @@
+['Nikola JokiÄ‡', 27.3, 22.8]
+['Michael Porter Jr.', 15.9, 15.5]
+['Kentavious Caldwell-Pope', 10.3, 10.1]
+['Aaron Gordon', 14.5, 13.6]
+['Jamal Murray', 18.3, 17.9]
+['Reggie Jackson', 10.9, 11.7]
+['Christian Braun', 7.2, 7.4]
+['Peyton Watson', 6.8, 7.0]
+['Justin Holiday', 2.7, 2.5]
+['Julian Strawther', 3.8, 4.3]
+['Zeke Nnaji', 3.2, 3.3]
+['DeAndre Jordan', 0.0, 0.0]
+Team ORtg: 121.0
+Team DRtg: 116.0

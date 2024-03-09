@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
-
+from season.season import get_team_boxscore_on_date 
 
 def get_offensive_defenseive_pace(team):
     url ="https://www.basketball-reference.com/leagues/NBA_2024.html#all_per_game_team-opponent"
@@ -59,7 +59,8 @@ def get_team_rating_on_day(season, team, date):
             data = line.split(',')
             game_date = data[0]
             if date == game_date:
-                return [data[1], data[2], data[3]]
+                #        ortg     drtg     pace  home_factor  away_factor
+                return [data[2], data[3], data[4], data[5], data[7]]
 
 def get_league_average_on_day(season, date):
     with open(f"season/csv/{season}/league_average.txt", "r") as file:
@@ -76,99 +77,114 @@ def predict_season(season):
     outright_by_differential_correct = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     outright_by_differential_incorrect = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     spread_talley = [0, 0]
+    seen_matchups = []
     with open(f"season/csv/{season}/box_score.txt") as file:
         for i, game in enumerate(file):
             if i == 0:
                 continue
             data = game.split(',')
-            date = data[0]
-            home_team = data[1]
-            away_team = data[23]
+            date = data[1]
 
-            home_score = float(data[4])
-            away_score = float(data[26])
-            winner = "tie"
-            spread = home_score - away_score
-            if data[2] == "W":
-                winner = home_team
-            else:
-                winner = away_team
-            home_ratings = get_team_rating_on_day(season, home_team, date)
-            away_ratings = get_team_rating_on_day(season, away_team, date)
-            average_ratings = get_league_average_on_day(season, date)
+            matchup = data[0].split(' ')
+            home_team = ""
+            away_team = ""
+            if matchup[1] == "vs.":
+                home_team = matchup[0]
+                away_team = matchup[2]
+            else:       
+                home_team = matchup[2]
+                away_team = matchup[0]
+            matchup = home_team + "," + away_team + "," + date
 
-            prediction = predict_manually(home_team, float(home_ratings[0]), float(home_ratings[1]), float(home_ratings[2]), away_team, float(away_ratings[0]), float(away_ratings[1]), float(away_ratings[2]), float(average_ratings[2]), float(average_ratings[0]))
+            if matchup not in seen_matchups:
+                seen_matchups.append(matchup)
+                home_box_score = get_team_boxscore_on_date(f"season/csv/{season}/box_score.txt", home_team, date)
+                away_box_score = get_team_boxscore_on_date(f"season/csv/{season}/box_score.txt", away_team, date)
+                home_score = float(home_box_score[6])
+                away_score = float(away_box_score[6])
 
-            predicted_spread = abs(prediction[0] - prediction[1])
+                winner = "tie"
+                spread = home_score - away_score
+                if home_score > away_score:
+                    winner = home_team
+                else:
+                    winner = away_team
+                home_ratings = get_team_rating_on_day(season, home_team, date)
+                away_ratings = get_team_rating_on_day(season, away_team, date)
+                average_ratings = get_league_average_on_day(season, date)
 
-            predicted_winner = "tie"
-            if prediction[0] > prediction[1]:
-                predicted_winner = home_team
-            else:
-                predicted_winner = away_team
+                prediction = predict_manually(home_team, float(home_ratings[0]), float(home_ratings[1]), float(home_ratings[2]), away_team, float(away_ratings[0]), float(away_ratings[1]), float(away_ratings[2]), float(average_ratings[2]), float(average_ratings[0]), float(home_ratings[3]), float(away_ratings[4]))
 
-            if round(predicted_spread) == 1 or round(predicted_spread) == 0:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[0] = outright_by_differential_correct[0] + 1
-                else:
-                    outright_by_differential_incorrect[0] = outright_by_differential_incorrect[0] + 1
-            elif round(predicted_spread) == 2:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[1] = outright_by_differential_correct[1] + 1
-                else:
-                    outright_by_differential_incorrect[1] = outright_by_differential_incorrect[1] + 1
-            elif round(predicted_spread) == 3:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[2] = outright_by_differential_correct[2] + 1
-                else:
-                    outright_by_differential_incorrect[2] = outright_by_differential_incorrect[2] + 1
-            elif round(predicted_spread) == 4:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[3] = outright_by_differential_correct[3] + 1
-                else:
-                    outright_by_differential_incorrect[3] = outright_by_differential_incorrect[3] + 1
-            elif round(predicted_spread) == 5:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[4] = outright_by_differential_correct[4] + 1
-                else:
-                    outright_by_differential_incorrect[4] = outright_by_differential_incorrect[4] + 1
-            elif round(predicted_spread) == 6:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[5] = outright_by_differential_correct[5] + 1
-                else:
-                    outright_by_differential_incorrect[5] = outright_by_differential_incorrect[5] + 1
-            elif round(predicted_spread) == 7:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[6] = outright_by_differential_correct[6] + 1
-                else:
-                    outright_by_differential_incorrect[6] = outright_by_differential_incorrect[6] + 1
-            elif round(predicted_spread) == 8:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[7] = outright_by_differential_correct[7] + 1
-                else:
-                    outright_by_differential_incorrect[7] = outright_by_differential_incorrect[7] + 1
-            elif round(predicted_spread) == 9:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[8] = outright_by_differential_correct[8] + 1
-                else:
-                    outright_by_differential_incorrect[8] = outright_by_differential_incorrect[8] + 1
-            elif round(predicted_spread) >= 10:
-                if predicted_winner == winner:
-                    outright_by_differential_correct[9] = outright_by_differential_correct[9] + 1
-                else:
-                    outright_by_differential_incorrect[9] = outright_by_differential_incorrect[9] + 1
-            else:
-                print(f"SPREAD={predicted_spread}")
-                
-            if predicted_spread <= spread:
-                spread_talley[0] = spread_talley[0] + 1
-            else:
-                spread_talley[1] = spread_talley[1] + 1
+                predicted_spread = abs(prediction[0] - prediction[1])
 
-            if predicted_winner == winner:
-                moneyline_talley[0] = moneyline_talley[0] + 1
-            else:
-                moneyline_talley[1] = moneyline_talley[1] + 1
+                predicted_winner = "tie"
+                if prediction[0] > prediction[1]:
+                    predicted_winner = home_team
+                else:
+                    predicted_winner = away_team
+
+                if round(predicted_spread) == 1 or round(predicted_spread) == 0:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[0] = outright_by_differential_correct[0] + 1
+                    else:
+                        outright_by_differential_incorrect[0] = outright_by_differential_incorrect[0] + 1
+                elif round(predicted_spread) == 2:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[1] = outright_by_differential_correct[1] + 1
+                    else:
+                        outright_by_differential_incorrect[1] = outright_by_differential_incorrect[1] + 1
+                elif round(predicted_spread) == 3:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[2] = outright_by_differential_correct[2] + 1
+                    else:
+                        outright_by_differential_incorrect[2] = outright_by_differential_incorrect[2] + 1
+                elif round(predicted_spread) == 4:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[3] = outright_by_differential_correct[3] + 1
+                    else:
+                        outright_by_differential_incorrect[3] = outright_by_differential_incorrect[3] + 1
+                elif round(predicted_spread) == 5:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[4] = outright_by_differential_correct[4] + 1
+                    else:
+                        outright_by_differential_incorrect[4] = outright_by_differential_incorrect[4] + 1
+                elif round(predicted_spread) == 6:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[5] = outright_by_differential_correct[5] + 1
+                    else:
+                        outright_by_differential_incorrect[5] = outright_by_differential_incorrect[5] + 1
+                elif round(predicted_spread) == 7:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[6] = outright_by_differential_correct[6] + 1
+                    else:
+                        outright_by_differential_incorrect[6] = outright_by_differential_incorrect[6] + 1
+                elif round(predicted_spread) == 8:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[7] = outright_by_differential_correct[7] + 1
+                    else:
+                        outright_by_differential_incorrect[7] = outright_by_differential_incorrect[7] + 1
+                elif round(predicted_spread) == 9:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[8] = outright_by_differential_correct[8] + 1
+                    else:
+                        outright_by_differential_incorrect[8] = outright_by_differential_incorrect[8] + 1
+                elif round(predicted_spread) >= 10:
+                    if predicted_winner == winner:
+                        outright_by_differential_correct[9] = outright_by_differential_correct[9] + 1
+                    else:
+                        outright_by_differential_incorrect[9] = outright_by_differential_incorrect[9] + 1
+                else:
+                    print(f"SPREAD={predicted_spread}")
+                    
+                if predicted_spread <= spread:
+                    spread_talley[0] = spread_talley[0] + 1
+                else:
+                    spread_talley[1] = spread_talley[1] + 1
+
+                if predicted_winner == winner:
+                    moneyline_talley[0] = moneyline_talley[0] + 1
+                else:
+                    moneyline_talley[1] = moneyline_talley[1] + 1
 
         differential_total = []
         for i in range(0, 10):
@@ -202,11 +218,11 @@ def predict_final_score(team_aoppp, predicted_pace):
 
 # Home team is team one
 # Away team is team two
-def predict_manually(team_one, team_one_ortg, team_one_drtg, team_one_pace, team_two, team_two_ortg, team_two_drtg, team_two_pace, league_pace, league_ortg):
-    team_one_adrtg = 0.986 * team_one_drtg
-    team_one_aortg = 1.014 * team_one_ortg
-    team_two_adrtg = 1.014 * team_two_drtg
-    team_two_aortg = 0.986 * team_two_ortg
+def predict_manually(team_one, team_one_ortg, team_one_drtg, team_one_pace, team_two, team_two_ortg, team_two_drtg, team_two_pace, league_pace, league_ortg, home_factor, away_factor):
+    team_one_adrtg = away_factor * team_one_drtg
+    team_one_aortg = home_factor * team_one_ortg
+    team_two_adrtg = home_factor * team_two_drtg
+    team_two_aortg = away_factor * team_two_ortg
 
     game_pace = (team_one_pace * team_two_pace) / league_pace
 
@@ -408,5 +424,23 @@ def relative_prediction():
         # 115
 
 
-        # 5  10 -5
-        # 5  9  -4
+        # (percentage of minutes played) * (usage rate) * (ORtg per 100 possessions) = ORtg contribution by player
+        # Jayson Tatum 
+        # ( 35.7 / 48 ) * ( 0.30 ) = 0.223%
+        # Jaylen Brown
+        # ( 33.3 / 48 ) * ( 0.281 ) = 0.195%
+        # Jrue Holiday
+        # ( 33.1 / 48 ) * ( 0.165 ) = 0.114%
+        # Derrick White
+        # ( 32.1 / 48 ) * ( 0.188 ) = 0.126%
+        # Kristaps Porzingis
+        # ( 29.7 / 48 ) * ( 0.248 ) = 0.153%
+
+        # 0.811
+
+        # Al Horford
+        # ( 26.7/48 ) * ( 0.114 ) = 0.063
+        # Payton Pritchard
+        # ( 20.4/48 ) * ( 0.161 ) = 0.068
+        # Sam Hauser 
+        # ( 21 / 48 ) * ( 0.138 ) = 0.06%

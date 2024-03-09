@@ -1,0 +1,14 @@
+Correct Moneyline: 847
+Correct Moneyline Percentage: 68.9%
+Incorrect Moneyline: 383
+Incorrect Percentage Moneyline: 31.1%
+Correct Spread: 426
+Correct Spread Percentage: 34.6%
+Incorrect Spread: 804
+Incorrect Percentage Spread: 65.4%
+
+Correct by Differential: [70, 70, 52, 60, 47, 43, 45, 51, 37, 372]
+Correct by Differential Percentage: ['50.0%', '56.0%', '56.5%', '63.8%', '64.4%', '61.4%', '61.6%', '79.7%', '69.8%', '83.4%']
+
+Incorrect by Differential: [70, 55, 40, 34, 26, 27, 28, 13, 16, 74]
+Incorrect by Differential Percentage: ['50.0%', '44.0%', '43.5%', '36.2%', '35.6%', '38.6%', '38.4%', '20.3%', '30.2%', '16.6%']

@@ -1,0 +1,14 @@
+['Giannis Antetokounmpo', 30.3, 26.7]
+['Damian Lillard', 24.9, 24.5]
+['Brook Lopez', 12.3, 11.6]
+['Malik Beasley', 10.4, 10.2]
+['Bobby Portis', 12.8, 12.7]
+['Pat Connaughton', 5.7, 5.4]
+['Khris Middleton', 10.6, 10.6]
+['Jae Crowder', 4.4, 4.5]
+['Cameron Payne', 5.3, 5.2]
+['MarJon Beauchamp', 3.0, 3.2]
+['Andre Jackson Jr.', 2.3, 2.1]
+['A.J. Green', 2.8, 2.7]
+Team ORtg: 124.7
+Team DRtg: 119.3

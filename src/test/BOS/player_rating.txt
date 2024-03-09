@@ -1,0 +1,12 @@
+['Jayson Tatum', 27.0, 24.5]
+['Jaylen Brown', 22.2, 21.8]
+['Jrue Holiday', 13.8, 12.7]
+['Derrick White', 15.8, 14.1]
+['Al Horford', 7.2, 5.9]
+['Kristaps PorziÅ†Ä£is', 13.9, 11.7]
+['Sam Hauser', 7.5, 6.9]
+['Payton Pritchard', 8.6, 7.9]
+['Luke Kornet', 3.6, 2.6]
+['Oshae Brissett', 2.9, 2.6]
+Team ORtg: 122.5
+Team DRtg: 110.7

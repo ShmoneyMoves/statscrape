@@ -374,4 +374,29 @@ def get_games_on_date(date):
     else:
         return "ERROR: Invalid input"
     
-        
+def calculate_team_ortg(team, year):
+    url = f"https://www.basketball-reference.com/teams/{team}/{year}.html"
+
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Run in headless mode
+    chrome_options.add_argument('--no-sandbox')  # Bypass OS security model
+    chrome_options.add_argument('--disable-dev-shm-usage')  # Avoid /dev/shm usage
+    chrome_options.add_argument("--log-level=3")
+
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(url)
+
+    content = driver.page_source.encode('utf-8').strip()
+    soup = BeautifulSoup(content, 'html.parser')
+    
+    stats_table = soup.find('table', {'id': 'per_poss'})
+    result = []
+    if stats_table:
+        headers = [th.getText() for th in stats_table.findAll('tr', limit=2)[0].findAll('th')]
+        rows = stats_table.findAll('tr')[1:]
+        results = [[td.getText() for td in rows[i].findAll('td')]
+                        for i in range(len(rows))]
+        result.append(headers)
+        for entry in results:
+            result.append(entry)
+        return result
