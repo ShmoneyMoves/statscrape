@@ -168,9 +168,8 @@ def predict_season_from_scratch(year):
         print(entry)
 def main():
 
-    predict_season_from_scratch(2009)
+    response = predict_v1("Phoenix Suns", "Boston Celtics")
+    print(response)
     
 if __name__ == '__main__':
     main()
-
-

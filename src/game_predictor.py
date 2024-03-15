@@ -22,15 +22,15 @@ def get_offensive_defenseive_pace(team):
 
 def adjust_offensive_rating(offensive_rating, is_home):
     if is_home:
-        return offensive_rating + offensive_rating * 0.014
+        return offensive_rating + offensive_rating * 0.021523
     else:
-        return offensive_rating - offensive_rating *0.014
+        return offensive_rating - offensive_rating * 0.000855
     
 def adjust_defensive_rating(defensive_rating, is_home):
     if is_home:
-        return defensive_rating - defensive_rating * 0.014
+        return defensive_rating - defensive_rating * 0.021523
     else:
-        return defensive_rating + defensive_rating *0.014
+        return defensive_rating + defensive_rating * 0.000855
     
 
 def get_league_offensive_defenseive_pace():
@@ -246,7 +246,7 @@ def predict_game_v1(away_team, home_team):
    
     team_one = away_team
     team_two = home_team
-    print_statistics = True
+    print_statistics = False
 
     league_rtgs = get_league_offensive_defenseive_pace()
     if print_statistics:
